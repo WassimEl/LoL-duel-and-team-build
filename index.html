@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Arène 1v1 League of Legends V0.3</title>
+    <title>Arène 1v1 League of Legends V0.4</title>
     <style>
         * {
             box-sizing: border-box;
@@ -214,6 +214,18 @@
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 130px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .champ-icon {
+            width: 22px;
+            height: 22px;
+            object-fit: contain;
+            border-radius: 50%;
+            background: #1e2a3a;
+            padding: 2px;
         }
 
         .player-champ {
@@ -224,14 +236,9 @@
             font-family: monospace;
             font-weight: 400;
             color: #FFD966;
-        }
-
-        .empty-slot {
-            background: #080b12;
-            color: #5f687e;
-            justify-content: center;
-            border-left-color: #4a5568;
-            font-style: italic;
+            display: flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .vs-badge {
@@ -256,35 +263,53 @@
             transform: scale(0.98);
         }
 
+        /* Historique */
+        .history-section {
+            margin-top: 2rem;
+            background: #11141f;
+            border-radius: 28px;
+            padding: 1.2rem;
+            border: 1px solid #232837;
+        }
+
+        .history-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .history-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .history-card {
+            background: #1e2436;
+            border-radius: 20px;
+            padding: 0.5rem 1rem;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-left: 3px solid #D4AF37;
+        }
+
+        .clear-history {
+            background: #2d1f2a;
+            border-color: #7f3f5a;
+        }
+
         .footer-info {
             text-align: center;
             margin-top: 2rem;
             font-size: 0.75rem;
             color: #5b687c;
-        }
-
-        @media (max-width: 720px) {
-            body {
-                padding: 1rem;
-            }
-            .config-panel {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .random-toggle {
-                justify-content: space-between;
-                padding: 0.6rem 1rem;
-            }
-            .bracket {
-                gap: 1rem;
-            }
-            .round {
-                min-width: 180px;
-            }
-            .player-name {
-                max-width: 90px;
-                font-size: 0.75rem;
-            }
         }
     </style>
 </head>
@@ -292,7 +317,7 @@
 <div class="container">
     <div class="header">
         <h1>⚔️ ARENA 1v1 · League of Legends</h1>
-        <p>Génère un bracket · Champions aléatoires · Cliquez sur un joueur pour le déclarer vainqueur (tous les tours)</p>
+        <p>Champions aléatoires à CHAQUE tour · Historique des vainqueurs · Icônes officielles</p>
     </div>
 
     <div class="config-panel">
@@ -307,8 +332,8 @@
         <div class="btn-group">
             <button id="generateBtn" class="primary">✨ Générer le bracket</button>
         </div>
-        <div class="random-toggle" id="randomChampToggle">
-            <span>🎲 Champions aléatoires</span>
+        <div class="random-toggle">
+            <span>🎲 Champions aléatoires à chaque tour</span>
             <label style="display: flex; align-items: center; gap: 8px; cursor:pointer;">
                 <span style="font-size:0.9rem;">OFF</span>
                 <input type="checkbox" id="randomChampCheckbox" style="width: 18px; height: 18px; cursor:pointer;">
@@ -322,16 +347,28 @@
             <div style="text-align:center; padding: 2rem;">⚡ Entrez les joueurs et cliquez sur "Générer le bracket"</div>
         </div>
     </div>
+
+    <!-- SECTION HISTORIQUE -->
+    <div class="history-section" id="historySection">
+        <div class="history-title">
+            <span>🏆 HISTORIQUE DES VAINQUEURS</span>
+            <button id="clearHistoryBtn" class="clear-history">🗑️ Effacer l'historique</button>
+        </div>
+        <div id="historyList" class="history-list">
+            <span style="color:#6b7280;">Aucun vainqueur enregistré pour le moment.</span>
+        </div>
+    </div>
+
     <div class="footer-info">
-        🔹 <strong>Cliquez</strong> sur un joueur pour le déclarer vainqueur du match (met à jour tout le bracket)<br>
-        🔹 <strong>Double-cliquez</strong> sur un nom pour le modifier (les champions peuvent être regénérés avec le toggle)<br>
-        🔹 Les "BYE" sont automatiquement gagnants pour les joueurs sans adversaire
-        🔹 V0.3
+        🔹 <strong>Cliquez</strong> sur un joueur pour le déclarer vainqueur → automatiquement sauvegardé dans l'historique<br>
+        🔹 <strong>Double-cliquez</strong> sur un nom pour le modifier<br>
+        🔹 Les icônes des champions sont chargées depuis les serveurs Riot (Data Dragon)<br>
+        🔹 <strong>V0.4</strong>
     </div>
 </div>
 
 <script>
-    // ---------- BIBLIOTHÈQUE DE CHAMPIONS LoL ----------
+    // ---------- BIBLIOTHÈQUE DE CHAMPIONS (ta liste modifiée) ----------
     const CHAMPIONS_POOL = [
         "Ahri", "Akali", "Akshan", "Amumu", "Anivia", "Annie", "Aphelios", "Ashe", "Aurelion Sol",
         "Azir", "Brand", "Caitlyn", "Camille", "Cassiopeia", "Cho'Gath", "Corki", "Heimerdinger",
@@ -347,73 +384,150 @@
         "Sion", "Sivir", "Skarner", "Swain", "Sylas", "Syndra", "Tahm Kench", "Taliyah", "Talon", "Briar",
         "Teemo", "Tristana", "Trundle", "Tryndamere", "Twisted Fate", "Twitch", "Udyr", "Urgot", "Naafiri",  
         "Varus", "Vayne", "Veigar", "Vel'Koz", "Vex", "Vi", "Viego", "Viktor", "Vladimir", "K'Sante", "Zoe",
-        "Wukong", "Xayah", "Xerath", "Xin Zhao", "Yasuo", "Yone", "Yorick", "Zac", "Zed", "K'Sante", "Nilah", 
-        "Zyra", "Bel'Veth", "Nilah",
+        "Wukong", "Xayah", "Xerath", "Xin Zhao", "Yasuo", "Yone", "Yorick", "Zac", "Zed", "Nilah", 
+        "Zyra", "Bel'Veth"
     ];
 
-    function getRandomChampion() {
-        return CHAMPIONS_POOL[Math.floor(Math.random() * CHAMPIONS_POOL.length)];
+    // Nettoyer les doublons éventuels
+    const uniqueChamps = [...new Map(CHAMPIONS_POOL.map(c => [c.toLowerCase(), c])).values()];
+    
+    // Mapping des noms pour l'icône (on utilise l'ID Riot)
+    function getChampionKey(name) {
+        const specials = {
+            "Aurelion Sol": "AurelionSol",
+            "Cho'Gath": "Chogath",
+            "Dr. Mundo": "DrMundo",
+            "Jarvan IV": "JarvanIV",
+            "Kai'Sa": "Kaisa",
+            "Kha'Zix": "Khazix",
+            "Kog'Maw": "KogMaw",
+            "Lee Sin": "LeeSin",
+            "Master Yi": "MasterYi",
+            "Miss Fortune": "MissFortune",
+            "Tahm Kench": "TahmKench",
+            "Twisted Fate": "TwistedFate",
+            "Xin Zhao": "XinZhao",
+            "Bel'Veth": "Belveth"
+        };
+        if (specials[name]) return specials[name];
+        return name.replace(/'/g, '').replace(/\s/g, '');
     }
 
-    // Structure globale
-    let currentRounds = [];     // tableau des rounds (chaque round = tableau de matchs)
+    function getChampionIconUrl(champName) {
+        if (!champName || champName === "—") return null;
+        const key = getChampionKey(champName);
+        return `https://ddragon.leagueoflegends.com/cdn/14.1.1/img/champion/${key}.png`;
+    }
+
+    function getRandomChampion() {
+        return uniqueChamps[Math.floor(Math.random() * uniqueChamps.length)];
+    }
+
+    // ---------- GESTION DE L'HISTORIQUE (localStorage) ----------
+    let tournamentHistory = [];
+
+    function loadHistory() {
+        const saved = localStorage.getItem("lol1v1_history");
+        if (saved) {
+            try {
+                tournamentHistory = JSON.parse(saved);
+            } catch(e) { tournamentHistory = []; }
+        }
+        renderHistory();
+    }
+
+    function saveHistory() {
+        localStorage.setItem("lol1v1_history", JSON.stringify(tournamentHistory));
+        renderHistory();
+    }
+
+    function addWinnerToHistory(winnerName, championName, date) {
+        tournamentHistory.unshift({
+            winner: winnerName,
+            champion: championName,
+            date: date || new Date().toLocaleString()
+        });
+        // Garder seulement les 20 derniers
+        if (tournamentHistory.length > 20) tournamentHistory.pop();
+        saveHistory();
+    }
+
+    function clearHistory() {
+        tournamentHistory = [];
+        saveHistory();
+    }
+
+    function renderHistory() {
+        const container = document.getElementById("historyList");
+        if (!tournamentHistory.length) {
+            container.innerHTML = '<span style="color:#6b7280;">Aucun vainqueur enregistré pour le moment.</span>';
+            return;
+        }
+        container.innerHTML = tournamentHistory.map(entry => `
+            <div class="history-card">
+                <span>🏆 ${escapeHtml(entry.winner)}</span>
+                ${entry.champion && entry.champion !== "—" ? `
+                    <div class="player-champ" style="display:flex; align-items:center; gap:4px;">
+                        <img src="${getChampionIconUrl(entry.champion)}" class="champ-icon" style="width:18px;height:18px;" onerror="this.style.display='none'">
+                        <span>${escapeHtml(entry.champion)}</span>
+                    </div>
+                ` : ''}
+                <span style="font-size:0.7rem; color:#8a8f9e;">📅 ${entry.date}</span>
+            </div>
+        `).join('');
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // ---------- STRUCTURE DU BRACKET ----------
+    let currentRounds = [];
     let currentUseRandom = false;
 
-    // ---------- CRÉATION DU BRACKET AVEC BYES ----------
     function createBracket(playerNames, useRandomChamps) {
         const n = playerNames.length;
         let size = 1;
         while (size < n) size <<= 1;
         
-        // Premier tour
         const firstRoundMatches = [];
         let playerIdx = 0;
         
         for (let i = 0; i < size / 2; i++) {
             let p1 = null, p2 = null;
             
-            // Joueur 1
             if (playerIdx < n) {
                 const name = playerNames[playerIdx++];
-                p1 = {
-                    name: name,
-                    champion: useRandomChamps ? getRandomChampion() : "—",
-                    isBye: false
-                };
+                p1 = { name: name, champion: useRandomChamps ? getRandomChampion() : "—", isBye: false, pending: false };
             } else {
-                p1 = { name: "BYE", champion: "", isBye: true };
+                p1 = { name: "BYE", champion: "", isBye: true, pending: false };
             }
             
-            // Joueur 2
             if (playerIdx < n) {
                 const name = playerNames[playerIdx++];
-                p2 = {
-                    name: name,
-                    champion: useRandomChamps ? getRandomChampion() : "—",
-                    isBye: false
-                };
+                p2 = { name: name, champion: useRandomChamps ? getRandomChampion() : "—", isBye: false, pending: false };
             } else {
-                p2 = { name: "BYE", champion: "", isBye: true };
+                p2 = { name: "BYE", champion: "", isBye: true, pending: false };
             }
             
             firstRoundMatches.push({
                 id: crypto.randomUUID ? crypto.randomUUID() : Math.random().toString(),
-                p1: p1,
-                p2: p2,
-                winner: null   // 'p1' ou 'p2' ou null
+                p1: p1, p2: p2, winner: null
             });
         }
         
-        // Traitement automatique des BYE au premier tour
         for (let match of firstRoundMatches) {
             if (match.p1.isBye && !match.p2.isBye) match.winner = 'p2';
             else if (match.p2.isBye && !match.p1.isBye) match.winner = 'p1';
-            else if (match.p1.isBye && match.p2.isBye) match.winner = null;
         }
         
         const rounds = [firstRoundMatches];
-        
-        // Construire les rounds suivants (sans lien automatique pour l'instant)
         let currentMatches = firstRoundMatches;
         while (currentMatches.length > 1) {
             const nextRound = [];
@@ -431,55 +545,32 @@
             currentMatches = nextRound;
         }
         
-        // Mise à jour des matchs suivants en fonction des winners existants
-        updateAllNextRounds(rounds);
+        updateAllRounds(rounds);
         return rounds;
     }
     
-    // Met à jour les rounds supérieurs à partir des vainqueurs des rounds inférieurs
-    function updateAllNextRounds(rounds) {
+    function updateAllRounds(rounds) {
         if (!rounds.length) return;
-        
         for (let r = 0; r < rounds.length - 1; r++) {
-            const currentRound = rounds[r];
             const nextRound = rounds[r + 1];
-            
             for (let i = 0; i < nextRound.length; i++) {
                 const nextMatch = nextRound[i];
                 if (nextMatch.sourceLeft && nextMatch.sourceRight) {
                     const leftWinner = getMatchWinner(nextMatch.sourceLeft);
                     const rightWinner = getMatchWinner(nextMatch.sourceRight);
                     
-                    // Mise à jour des noms et champions
-                    if (leftWinner) {
-                        nextMatch.p1 = {
-                            name: leftWinner.name,
-                            champion: leftWinner.champion,
-                            isBye: leftWinner.isBye || false,
-                            pending: false
-                        };
-                    } else {
-                        nextMatch.p1 = { name: "???", champion: "—", isBye: false, pending: true };
-                    }
+                    const getChampionForPromotion = (oldChamp) => {
+                        if (!currentUseRandom) return "—";
+                        return getRandomChampion();
+                    };
                     
-                    if (rightWinner) {
-                        nextMatch.p2 = {
-                            name: rightWinner.name,
-                            champion: rightWinner.champion,
-                            isBye: rightWinner.isBye || false,
-                            pending: false
-                        };
-                    } else {
-                        nextMatch.p2 = { name: "???", champion: "—", isBye: false, pending: true };
-                    }
+                    nextMatch.p1 = leftWinner ? { ...leftWinner, champion: getChampionForPromotion(leftWinner.champion), pending: false } : { name: "???", champion: "—", isBye: false, pending: true };
+                    nextMatch.p2 = rightWinner ? { ...rightWinner, champion: getChampionForPromotion(rightWinner.champion), pending: false } : { name: "???", champion: "—", isBye: false, pending: true };
                     
-                    // Réinitialiser le winner si les participants ont changé
                     if (nextMatch.winner) {
                         const winnerStillValid = (nextMatch.winner === 'p1' && nextMatch.p1 && !nextMatch.p1.pending) ||
                                                 (nextMatch.winner === 'p2' && nextMatch.p2 && !nextMatch.p2.pending);
-                        if (!winnerStillValid) {
-                            nextMatch.winner = null;
-                        }
+                        if (!winnerStillValid) nextMatch.winner = null;
                     }
                 }
             }
@@ -493,28 +584,36 @@
         return null;
     }
     
-    // Déclarer un vainqueur pour un match spécifique
+    // Détecter la fin du tournoi et sauvegarder le vainqueur
+    function checkAndSaveTournamentWinner(rounds) {
+        if (!rounds.length) return;
+        const finalRound = rounds[rounds.length - 1];
+        if (finalRound.length === 1 && finalRound[0].winner) {
+            const finalMatch = finalRound[0];
+            const winner = finalMatch.winner === 'p1' ? finalMatch.p1 : finalMatch.p2;
+            if (winner && winner.name !== "BYE" && winner.name !== "???" && !winner.pending) {
+                // Sauvegarder uniquement si ce vainqueur n'est pas déjà le dernier enregistré (évite les doublons en rafale)
+                const lastWinner = tournamentHistory[0];
+                if (!lastWinner || lastWinner.winner !== winner.name || lastWinner.champion !== winner.champion) {
+                    addWinnerToHistory(winner.name, winner.champion !== "—" ? winner.champion : null, new Date().toLocaleString());
+                }
+            }
+        }
+    }
+    
     function setWinner(match, side) {
         if (!match) return;
-        if (side !== 'p1' && side !== 'p2') return;
-        
-        // Vérifier que le joueur existe et n'est pas "???" ou BYE
         if (side === 'p1') {
             if (!match.p1 || match.p1.pending || match.p1.name === "BYE" || match.p1.name === "???") return;
         } else {
             if (!match.p2 || match.p2.pending || match.p2.name === "BYE" || match.p2.name === "???") return;
         }
-        
         match.winner = side;
-        
-        // Mettre à jour tous les rounds suivants
-        updateAllNextRounds(currentRounds);
-        
-        // Re-rendu
+        updateAllRounds(currentRounds);
         renderBracket();
+        checkAndSaveTournamentWinner(currentRounds);
     }
     
-    // Éditer un nom de joueur
     function editPlayerName(match, side, newName) {
         if (side === 'p1') {
             if (match.p1.pending || match.p1.name === "BYE") return;
@@ -525,16 +624,12 @@
             match.p2.name = newName.trim() || "Joueur";
             if (currentUseRandom) match.p2.champion = getRandomChampion();
         }
-        
-        // Réinitialiser le winner de ce match car les participants ont changé
         match.winner = null;
-        
-        // Recalculer tous les rounds suivants
-        updateAllNextRounds(currentRounds);
+        updateAllRounds(currentRounds);
         renderBracket();
     }
     
-    // Rendu graphique complet
+    // Rendu avec icônes
     function renderBracket() {
         const container = document.getElementById("bracketTree");
         if (!currentRounds.length) {
@@ -564,47 +659,43 @@
                 const match = round[m];
                 const card = document.createElement("div");
                 card.className = "match-card";
-                
                 const playersDiv = document.createElement("div");
                 playersDiv.className = "match-players";
                 
-                // Joueur 1
-                const p1Div = document.createElement("div");
-                p1Div.className = `player-slot ${match.winner === 'p1' ? 'winner' : ''}`;
-                const p1NameSpan = document.createElement("span");
-                p1NameSpan.className = "player-name";
-                let p1Display = match.p1.name;
-                if (match.p1.name === "BYE") p1Display = "🆓 BYE";
-                else if (match.p1.pending || match.p1.name === "???") p1Display = "❓ En attente";
-                p1NameSpan.innerText = p1Display;
+                const createPlayerDiv = (player, isWinner, side) => {
+                    const div = document.createElement("div");
+                    div.className = `player-slot ${isWinner ? 'winner' : ''}`;
+                    const nameSpan = document.createElement("span");
+                    nameSpan.className = "player-name";
+                    let displayName = player.name;
+                    if (player.name === "BYE") displayName = "🆓 BYE";
+                    else if (player.pending || player.name === "???") displayName = "❓ En attente";
+                    nameSpan.innerText = displayName;
+                    
+                    const champSpan = document.createElement("span");
+                    champSpan.className = "player-champ";
+                    if (!player.pending && player.name !== "BYE" && player.name !== "???" && player.champion && player.champion !== "—") {
+                        const iconUrl = getChampionIconUrl(player.champion);
+                        if (iconUrl) {
+                            const img = document.createElement("img");
+                            img.src = iconUrl;
+                            img.className = "champ-icon";
+                            img.onerror = () => img.style.display = 'none';
+                            champSpan.appendChild(img);
+                        }
+                        champSpan.appendChild(document.createTextNode(player.champion));
+                    } else if (player.name === "BYE") {
+                        // rien
+                    } else {
+                        champSpan.innerText = "⚔️";
+                    }
+                    div.appendChild(nameSpan);
+                    div.appendChild(champSpan);
+                    return div;
+                };
                 
-                const p1ChampSpan = document.createElement("span");
-                p1ChampSpan.className = "player-champ";
-                if (!match.p1.pending && match.p1.name !== "BYE" && match.p1.name !== "???" && match.p1.champion && match.p1.champion !== "—") {
-                    p1ChampSpan.innerText = match.p1.champion;
-                } else if (match.p1.name === "BYE") p1ChampSpan.innerText = "";
-                else p1ChampSpan.innerText = "⚔️";
-                p1Div.appendChild(p1NameSpan);
-                p1Div.appendChild(p1ChampSpan);
-                
-                // Joueur 2
-                const p2Div = document.createElement("div");
-                p2Div.className = `player-slot ${match.winner === 'p2' ? 'winner' : ''}`;
-                const p2NameSpan = document.createElement("span");
-                p2NameSpan.className = "player-name";
-                let p2Display = match.p2.name;
-                if (match.p2.name === "BYE") p2Display = "🆓 BYE";
-                else if (match.p2.pending || match.p2.name === "???") p2Display = "❓ En attente";
-                p2NameSpan.innerText = p2Display;
-                
-                const p2ChampSpan = document.createElement("span");
-                p2ChampSpan.className = "player-champ";
-                if (!match.p2.pending && match.p2.name !== "BYE" && match.p2.name !== "???" && match.p2.champion && match.p2.champion !== "—") {
-                    p2ChampSpan.innerText = match.p2.champion;
-                } else if (match.p2.name === "BYE") p2ChampSpan.innerText = "";
-                else p2ChampSpan.innerText = "⚔️";
-                p2Div.appendChild(p2NameSpan);
-                p2Div.appendChild(p2ChampSpan);
+                const p1Div = createPlayerDiv(match.p1, match.winner === 'p1', 'p1');
+                const p2Div = createPlayerDiv(match.p2, match.winner === 'p2', 'p2');
                 
                 playersDiv.appendChild(p1Div);
                 const vs = document.createElement("div");
@@ -613,46 +704,29 @@
                 playersDiv.appendChild(vs);
                 playersDiv.appendChild(p2Div);
                 
-                // Vérifier si le match est cliquable (pas de pending, pas de BYE uniquement)
                 const isP1Clickable = !match.p1.pending && match.p1.name !== "BYE" && match.p1.name !== "???";
                 const isP2Clickable = !match.p2.pending && match.p2.name !== "BYE" && match.p2.name !== "???";
                 
                 if (isP1Clickable) {
                     p1Div.classList.add("clickable");
-                    p1Div.title = "Cliquez pour déclarer vainqueur (gauche)";
-                    p1Div.onclick = (e) => {
-                        e.stopPropagation();
-                        setWinner(match, 'p1');
-                    };
+                    p1Div.onclick = (e) => { e.stopPropagation(); setWinner(match, 'p1'); };
                 }
-                
                 if (isP2Clickable) {
                     p2Div.classList.add("clickable");
-                    p2Div.title = "Cliquez pour déclarer vainqueur (droite)";
-                    p2Div.onclick = (e) => {
-                        e.stopPropagation();
-                        setWinner(match, 'p2');
-                    };
+                    p2Div.onclick = (e) => { e.stopPropagation(); setWinner(match, 'p2'); };
                 }
-                
-                // Double-clic pour éditer les noms (sauf BYE et pending)
                 if (isP1Clickable) {
                     p1Div.ondblclick = (e) => {
                         e.stopPropagation();
-                        const newName = prompt("Nouveau nom du joueur (gauche) :", match.p1.name);
-                        if (newName !== null && newName.trim() !== "") {
-                            editPlayerName(match, 'p1', newName);
-                        }
+                        const newName = prompt("Nouveau nom (gauche):", match.p1.name);
+                        if (newName && newName.trim()) editPlayerName(match, 'p1', newName);
                     };
                 }
-                
                 if (isP2Clickable) {
                     p2Div.ondblclick = (e) => {
                         e.stopPropagation();
-                        const newName = prompt("Nouveau nom du joueur (droite) :", match.p2.name);
-                        if (newName !== null && newName.trim() !== "") {
-                            editPlayerName(match, 'p2', newName);
-                        }
+                        const newName = prompt("Nouveau nom (droite):", match.p2.name);
+                        if (newName && newName.trim()) editPlayerName(match, 'p2', newName);
                     };
                 }
                 
@@ -661,89 +735,54 @@
             }
             bracketDiv.appendChild(roundDiv);
         }
-        
         container.innerHTML = "";
         container.appendChild(bracketDiv);
     }
     
-    // Extraire les noms du premier tour pour régénération
     function extractPlayerNamesFromBracket(rounds) {
         if (!rounds.length) return [];
         const names = [];
-        const firstRound = rounds[0];
-        for (const match of firstRound) {
-            if (match.p1 && !match.p1.pending && match.p1.name !== "BYE" && match.p1.name !== "???") {
-                names.push(match.p1.name);
-            }
-            if (match.p2 && !match.p2.pending && match.p2.name !== "BYE" && match.p2.name !== "???") {
-                names.push(match.p2.name);
-            }
+        for (const match of rounds[0]) {
+            if (match.p1 && !match.p1.pending && match.p1.name !== "BYE" && match.p1.name !== "???") names.push(match.p1.name);
+            if (match.p2 && !match.p2.pending && match.p2.name !== "BYE" && match.p2.name !== "???") names.push(match.p2.name);
         }
         return names;
     }
     
-    // Génération depuis l'UI
     function generateFromUI() {
         let count = parseInt(document.getElementById("playerCount").value, 10);
         let rawNames = document.getElementById("playerNamesInput").value;
         currentUseRandom = document.getElementById("randomChampCheckbox").checked;
-        
         let namesList = [];
-        
         if (rawNames.trim() !== "") {
             let byComma = rawNames.split(",").map(s => s.trim()).filter(s => s);
-            if (byComma.length > 1) {
-                namesList = byComma;
-            } else {
-                let byLine = rawNames.split(/\r?\n/).map(s => s.trim()).filter(s => s);
-                namesList = byLine;
-            }
+            if (byComma.length > 1) namesList = byComma;
+            else namesList = rawNames.split(/\r?\n/).map(s => s.trim()).filter(s => s);
         }
-        
-        // Ajuster au nombre demandé
-        if (namesList.length === 0) {
-            for (let i = 1; i <= count; i++) namesList.push(`Joueur ${i}`);
-        } else if (namesList.length !== count) {
+        if (namesList.length === 0) for (let i=1; i<=count; i++) namesList.push(`Joueur ${i}`);
+        else if (namesList.length !== count) {
             if (namesList.length > count) namesList = namesList.slice(0, count);
-            else {
-                for (let i = namesList.length + 1; i <= count; i++) namesList.push(`Joueur ${i}`);
-            }
+            else for (let i=namesList.length+1; i<=count; i++) namesList.push(`Joueur ${i}`);
         }
-        
-        // Mettre à jour le textarea pour affichage
         document.getElementById("playerNamesInput").value = namesList.join(", ");
-        
-        // Créer le bracket
         currentRounds = createBracket(namesList, currentUseRandom);
         renderBracket();
     }
     
-    // Re-générer avec les mêmes noms mais changement du toggle random
     function regenerateWithSameNames() {
-        if (!currentRounds.length) {
-            generateFromUI();
-            return;
-        }
+        if (!currentRounds.length) { generateFromUI(); return; }
         const names = extractPlayerNamesFromBracket(currentRounds);
-        if (names.length === 0) {
-            generateFromUI();
-            return;
-        }
+        if (!names.length) { generateFromUI(); return; }
         currentUseRandom = document.getElementById("randomChampCheckbox").checked;
         currentRounds = createBracket(names, currentUseRandom);
         renderBracket();
     }
     
-    // Événements
-    document.getElementById("generateBtn").addEventListener("click", () => {
-        generateFromUI();
-    });
+    document.getElementById("generateBtn").addEventListener("click", generateFromUI);
+    document.getElementById("randomChampCheckbox").addEventListener("change", regenerateWithSameNames);
+    document.getElementById("clearHistoryBtn").addEventListener("click", () => clearHistory());
     
-    document.getElementById("randomChampCheckbox").addEventListener("change", () => {
-        regenerateWithSameNames();
-    });
-    
-    // Initialisation avec des joueurs par défaut
+    loadHistory();
     (function init() {
         document.getElementById("playerNamesInput").value = "Faker, Caps, Chovy, Zeus, Gumayusi, BeryL, Oner, Keria";
         document.getElementById("playerCount").value = "8";
