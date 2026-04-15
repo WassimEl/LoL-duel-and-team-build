@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>BSV0 - Arène 1v1 League of Legends</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: #0a0c12;
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, sans-serif;
+            color: #eef2ff;
+            padding: 1.5rem;
+            line-height: 1.4;
+        }
+
+        /* container principal */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        /* header */
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            background: linear-gradient(135deg, #D4AF37, #FFD966);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: -0.3px;
+        }
+
+        .header p {
+            color: #8a8f9e;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* panneau de configuration */
+        .config-panel {
+            background: #11141f;
+            border-radius: 28px;
+            padding: 1.2rem 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            border: 1px solid #232837;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .input-group label {
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #9ca3af;
+        }
+
+        .input-group input, .input-group textarea {
+            background: #1e2436;
+            border: 1px solid #2d354a;
+            border-radius: 20px;
+            padding: 0.7rem 1rem;
+            color: white;
+            font-size: 0.9rem;
+            font-family: monospace;
+            transition: all 0.2s;
+        }
+
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #D4AF37;
+            box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.3);
+        }
+
+        .input-group textarea {
+            resize: vertical;
+            font-family: 'Inter', monospace;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            background: #1e293b;
+            border: none;
+            padding: 0.7rem 1.3rem;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #e2e8f0;
+            border: 1px solid #334155;
+        }
+
+        button.primary {
+            background: #D4AF37;
+            color: #0a0c12;
+            border: none;
+            box-shadow: 0 2px 8px rgba(212,175,55,0.3);
+        }
+
+        button.primary:hover {
+            background: #e5c354;
+            transform: scale(0.97);
+        }
+
+        button:hover {
+            background: #2d3a5e;
+            border-color: #5b6e8c;
+        }
+
+        /* toggle champions aléatoires */
+        .random-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #0f121b;
+            padding: 0 1rem;
+            border-radius: 40px;
+            border: 1px solid #2d354a;
+        }
+
+        .random-toggle span {
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        /* style du bracket */
+        .bracket-wrapper {
+            overflow-x: auto;
+            padding-bottom: 1rem;
+        }
+
+        .bracket {
+            display: flex;
+            flex-direction: row;
+            gap: 2rem;
+            justify-content: center;
+            min-width: 700px;
+        }
+
+        .round {
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+            min-width: 220px;
+        }
+
+        .round-title {
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.85rem;
+            background: #1a1f2e;
+            padding: 0.4rem;
+            border-radius: 30px;
+            margin-bottom: 0.5rem;
+            letter-spacing: 0.5px;
+            color: #cbd5e6;
+        }
+
+        .match-card {
+            background: #11141fcc;
+            backdrop-filter: blur(2px);
+            border: 1px solid #2a2f42;
+            border-radius: 20px;
+            padding: 0.7rem;
+            transition: all 0.1s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .match-players {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .player-slot {
+            background: #0c0f18;
+            border-radius: 40px;
+            padding: 0.5rem 0.8rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border-left: 3px solid #D4AF37;
+        }
+
+        .player-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 130px;
+        }
+
+        .player-champ {
+            font-size: 0.7rem;
+            background: #1f2a3e;
+            padding: 0.2rem 0.6rem;
+            border-radius: 30px;
+            font-family: monospace;
+            font-weight: 400;
+            color: #FFD966;
+        }
+
+        .empty-slot {
+            background: #080b12;
+            color: #5f687e;
+            justify-content: center;
+            border-left-color: #4a5568;
+            font-style: italic;
+        }
+
+        .vs-badge {
+            text-align: center;
+            font-size: 0.65rem;
+            color: #a0a8c0;
+            margin: 4px 0;
+        }
+
+        /* winner style */
+        .winner {
+            background: #1f2a1f;
+            border-left-color: #2ecc71;
+            box-shadow: 0 0 4px #2ecc7150;
+        }
+
+        .footer-info {
+            text-align: center;
+            margin-top: 2rem;
+            font-size: 0.75rem;
+            color: #5b687c;
+        }
+
+        @media (max-width: 720px) {
+            body {
+                padding: 1rem;
+            }
+            .config-panel {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .random-toggle {
+                justify-content: space-between;
+                padding: 0.6rem 1rem;
+            }
+            .bracket {
+                gap: 1rem;
+            }
+            .round {
+                min-width: 180px;
+            }
+            .player-name {
+                max-width: 90px;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>⚔️ ARENA 1v1 · League of Legends</h1>
+        <p>Génère un bracket · Champions aléatoires · Hydratez vos duels</p>
+    </div>
+
+    <div class="config-panel">
+        <div class="input-group">
+            <label>🏆 NOMBRE DE JOUEURS</label>
+            <input type="number" id="playerCount" min="2" max="64" value="8" step="1">
+        </div>
+        <div class="input-group">
+            <label>📝 NOMS (séparés par virgule ou retour ligne)</label>
+            <textarea id="playerNamesInput" rows="2" placeholder="Ex: Faker, Caps, Chovy, Zeus, Gumayusi, Beryl, Oner, Keria"></textarea>
+        </div>
+        <div class="btn-group">
+            <button id="generateBtn" class="primary">✨ Générer le bracket</button>
+        </div>
+        <div class="random-toggle" id="randomChampToggle">
+            <span>🎲 Champions aléatoires</span>
+            <label style="display: flex; align-items: center; gap: 8px; cursor:pointer;">
+                <span style="font-size:0.9rem;">OFF</span>
+                <input type="checkbox" id="randomChampCheckbox" style="width: 18px; height: 18px; cursor:pointer;">
+                <span style="font-size:0.9rem;">ON</span>
+            </label>
+        </div>
+    </div>
+
+    <div class="bracket-wrapper" id="bracketContainer">
+        <div class="bracket" id="bracketTree">
+            <!-- bracket généré dynamiquement -->
+            <div style="text-align:center; padding: 2rem;">⚡ Entrez les joueurs et cliquez sur "Générer le bracket"</div>
+        </div>
+    </div>
+    <div class="footer-info">
+        🔹 Édition simple: double-cliquez sur un nom de joueur pour le modifier (met à jour le bracket)<br>
+        🔹 Les matchs se jouent en BO1, les vainqueurs sont automatiquement propagés (éditez les noms pour simuler)
+    </div>
+</div>
+
+<script>
+    // ---------- BIBLIOTHÈQUE DE CHAMPIONS LoL (version représentative) ----------
+    const CHAMPIONS_POOL = [
+        "Ahri", "Akali", "Akshan", "Alistar", "Amumu", "Anivia", "Annie", "Aphelios", "Ashe", "Aurelion Sol",
+        "Azir", "Bard", "Blitzcrank", "Brand", "Braum", "Caitlyn", "Camille", "Cassiopeia", "Cho'Gath", "Corki",
+        "Darius", "Diana", "Draven", "Dr. Mundo", "Ekko", "Elise", "Evelynn", "Ezreal", "Fiddlesticks", "Fiora",
+        "Fizz", "Galio", "Gangplank", "Garen", "Gnar", "Gragas", "Graves", "Gwen", "Hecarim", "Heimerdinger",
+        "Illaoi", "Irelia", "Ivern", "Janna", "Jarvan IV", "Jax", "Jayce", "Jhin", "Jinx", "Kai'Sa", "Kalista",
+        "Karma", "Karthus", "Kassadin", "Katarina", "Kayle", "Kayn", "Kennen", "Kha'Zix", "Kindred", "Kled",
+        "Kog'Maw", "LeBlanc", "Lee Sin", "Leona", "Lillia", "Lissandra", "Lucian", "Lulu", "Lux", "Malphite",
+        "Malzahar", "Maokai", "Master Yi", "Milio", "Miss Fortune", "Mordekaiser", "Morgana", "Nami", "Nasus",
+        "Nautilus", "Neeko", "Nidalee", "Nocturne", "Nunu", "Olaf", "Orianna", "Ornn", "Pantheon", "Poppy",
+        "Pyke", "Qiyana", "Quinn", "Rakan", "Rammus", "Rek'Sai", "Rell", "Renata", "Renekton", "Rengar", "Riven",
+        "Rumble", "Ryze", "Samira", "Sejuani", "Senna", "Seraphine", "Sett", "Shaco", "Shen", "Shyvana", "Singed",
+        "Sion", "Sivir", "Skarner", "Sona", "Soraka", "Swain", "Sylas", "Syndra", "Tahm Kench", "Taliyah", "Talon",
+        "Taric", "Teemo", "Thresh", "Tristana", "Trundle", "Tryndamere", "Twisted Fate", "Twitch", "Udyr", "Urgot",
+        "Varus", "Vayne", "Veigar", "Vel'Koz", "Vex", "Vi", "Viego", "Viktor", "Vladimir", "Volibear", "Warwick",
+        "Wukong", "Xayah", "Xerath", "Xin Zhao", "Yasuo", "Yone", "Yorick", "Yuumi", "Zac", "Zed", "Zeri", "Ziggs",
+        "Zilean", "Zoe", "Zyra"
+    ];
+
+    // Helper: random champion
+    function getRandomChampion() {
+        return CHAMPIONS_POOL[Math.floor(Math.random() * CHAMPIONS_POOL.length)];
+    }
+
+    // Structure globale: stocke le bracket actuel (rounds)
+    let currentBracket = [];   // array of rounds, chaque round = array de matchs
+    // match: { p1: { name, champion }, p2: { name, champion }, winnerIdx: 0|1|null, id }
+
+    // Générer le bracket à partir d'une liste de noms (joueurs)
+    function generateBracketFromPlayers(playerNamesArray, useRandomChamps) {
+        if (!playerNamesArray.length) return [];
+        // On veut une puissance de 2 supérieure ou égale au nb joueurs (pour BYEs)
+        let n = playerNamesArray.length;
+        let size = 1;
+        while (size < n) size <<= 1;
+        
+        // Construire le premier tour (Round of X)
+        let firstRoundMatches = [];
+        let playerIdx = 0;
+        for (let i = 0; i < size / 2; i++) {
+            let p1Obj = null, p2Obj = null;
+            if (playerIdx < n) {
+                let name = playerNamesArray[playerIdx++];
+                let champ = useRandomChamps ? getRandomChampion() : "—";
+                p1Obj = { name: name, champion: champ };
+            } else {
+                p1Obj = { name: "BYE", champion: "", isBye: true };
+            }
+            if (playerIdx < n) {
+                let name = playerNamesArray[playerIdx++];
+                let champ = useRandomChamps ? getRandomChampion() : "—";
+                p2Obj = { name: name, champion: champ };
+            } else {
+                p2Obj = { name: "BYE", champion: "", isBye: true };
+            }
+            // Déterminer winner: si BYE => l'autre gagne automatiquement (sauf si double BYE impossible)
+            let winnerIdx = null;
+            if (p1Obj.name === "BYE" && p2Obj.name !== "BYE") winnerIdx = 1;
+            else if (p2Obj.name === "BYE" && p1Obj.name !== "BYE") winnerIdx = 0;
+            else if (p1Obj.name === "BYE" && p2Obj.name === "BYE") winnerIdx = null;
+            
+            firstRoundMatches.push({
+                p1: p1Obj,
+                p2: p2Obj,
+                winnerIdx: winnerIdx,
+                id: Math.random()
+            });
+        }
+        
+        let rounds = [firstRoundMatches];
+        // Construire les rounds suivants (arbre)
+        let currentRoundMatches = firstRoundMatches;
+        while (currentRoundMatches.length > 1) {
+            let nextRound = [];
+            for (let i = 0; i < currentRoundMatches.length; i += 2) {
+                nextRound.push({
+                    p1: { name: "À déterminer", champion: "", pending: true },
+                    p2: { name: "À déterminer", champion: "", pending: true },
+                    winnerIdx: null,
+                    id: Math.random(),
+                    sourceMatches: [currentRoundMatches[i], currentRoundMatches[i+1]]
+                });
+            }
+            rounds.push(nextRound);
+            currentRoundMatches = nextRound;
+        }
+        
+        // Propagation des vainqueurs (recalcul après chaque changement)
+        propagateWinners(rounds);
+        return rounds;
+    }
+    
+    // Propager les gagnants depuis les matchs du bas
+    function propagateWinners(rounds) {
+        if (!rounds.length) return;
+        // Parcours depuis le premier tour (round 0) vers le haut
+        for (let r = 0; r < rounds.length - 1; r++) {
+            let currentRound = rounds[r];
+            let nextRound = rounds[r+1];
+            for (let i = 0; i < nextRound.length; i++) {
+                let upperMatch = nextRound[i];
+                if (upperMatch.sourceMatches) {
+                    let leftMatch = upperMatch.sourceMatches[0];
+                    let rightMatch = upperMatch.sourceMatches[1];
+                    let leftWinner = getWinnerFromMatch(leftMatch);
+                    let rightWinner = getWinnerFromMatch(rightMatch);
+                    upperMatch.p1 = leftWinner ? { ...leftWinner, pending: false } : { name: "—", champion: "", empty: true };
+                    upperMatch.p2 = rightWinner ? { ...rightWinner, pending: false } : { name: "—", champion: "", empty: true };
+                    // reset winner idx car pas encore décidé
+                    upperMatch.winnerIdx = null;
+                }
+            }
+        }
+        // Option: pour la finale, on garde
+    }
+    
+    function getWinnerFromMatch(match) {
+        if (!match) return null;
+        if (match.winnerIdx !== null && match.winnerIdx !== undefined) {
+            let winner = match.winnerIdx === 0 ? match.p1 : match.p2;
+            if (winner && winner.name && winner.name !== "BYE" && !winner.empty) return winner;
+        }
+        // Si BYE auto: gestion déjà lors init
+        if (match.p1 && match.p1.name === "BYE" && match.p2 && match.p2.name !== "BYE") return match.p2;
+        if (match.p2 && match.p2.name === "BYE" && match.p1 && match.p1.name !== "BYE") return match.p1;
+        return null;
+    }
+    
+    // Mettre à jour un gagnant manuellement (double-click)
+    function setMatchWinner(match, winnerSide, rounds) {
+        if (!match.p1 || !match.p2) return;
+        if (match.p1.name === "BYE" && winnerSide !== 0) {
+            if(match.p2.name !== "BYE") match.winnerIdx = 1;
+            else return;
+        } else if (match.p2.name === "BYE" && winnerSide !== 1) {
+            if(match.p1.name !== "BYE") match.winnerIdx = 0;
+            else return;
+        } else {
+            if (winnerSide === 0) match.winnerIdx = 0;
+            else if (winnerSide === 1) match.winnerIdx = 1;
+        }
+        // Recalcul global propagation
+        propagateWinners(rounds);
+        // re-render
+        renderBracket(rounds, document.getElementById("randomChampCheckbox").checked);
+    }
+    
+    // Edition d'un nom de joueur dans un slot (double click)
+    function editPlayerName(match, playerSide, newName, useRandomChamps, rounds) {
+        if (playerSide === 0) {
+            if (match.p1.name === "BYE") return;
+            let oldChamp = match.p1.champion;
+            match.p1.name = newName.trim() === "" ? "Joueur" : newName.trim();
+            if (useRandomChamps) match.p1.champion = getRandomChampion();
+            else match.p1.champion = oldChamp !== "—" ? oldChamp : "—";
+        } else {
+            if (match.p2.name === "BYE") return;
+            let oldChamp = match.p2.champion;
+            match.p2.name = newName.trim() === "" ? "Joueur" : newName.trim();
+            if (useRandomChamps) match.p2.champion = getRandomChampion();
+            else match.p2.champion = oldChamp !== "—" ? oldChamp : "—";
+        }
+        // reset winner if existant
+        match.winnerIdx = null;
+        propagateWinners(rounds);
+        renderBracket(rounds, useRandomChamps);
+    }
+    
+    // Rendu DOM
+    function renderBracket(rounds, useRandomChamps) {
+        const container = document.getElementById("bracketTree");
+        if (!rounds.length) {
+            container.innerHTML = '<div style="text-align:center; padding:2rem;">Aucun bracket, entrez des joueurs.</div>';
+            return;
+        }
+        const bracketDiv = document.createElement("div");
+        bracketDiv.className = "bracket";
+        
+        for (let r = 0; r < rounds.length; r++) {
+            const roundDiv = document.createElement("div");
+            roundDiv.className = "round";
+            let roundName = "";
+            if (r === 0) roundName = "🎯 Premier tour";
+            else if (r === rounds.length-1) roundName = "🏆 FINALE";
+            else roundName = `Tour ${r}`;
+            const titleSpan = document.createElement("div");
+            titleSpan.className = "round-title";
+            titleSpan.innerText = roundName;
+            roundDiv.appendChild(titleSpan);
+            
+            const matches = rounds[r];
+            for (let mIdx = 0; mIdx < matches.length; mIdx++) {
+                const match = matches[mIdx];
+                const card = document.createElement("div");
+                card.className = "match-card";
+                const playersDiv = document.createElement("div");
+                playersDiv.className = "match-players";
+                
+                // Joueur 1
+                const p1Div = document.createElement("div");
+                p1Div.className = `player-slot ${match.winnerIdx === 0 ? 'winner' : ''}`;
+                const p1NameSpan = document.createElement("span");
+                p1NameSpan.className = "player-name";
+                let p1DisplayName = match.p1.name;
+                if (match.p1.name === "BYE") p1DisplayName = "🆓 BYE";
+                else if (match.p1.pending || match.p1.name === "À déterminer") p1DisplayName = "❓ En attente";
+                p1NameSpan.innerText = p1DisplayName;
+                const p1ChampSpan = document.createElement("span");
+                p1ChampSpan.className = "player-champ";
+                if (!match.p1.pending && match.p1.name !== "BYE" && match.p1.name !== "À déterminer" && match.p1.champion && match.p1.champion !== "—") {
+                    p1ChampSpan.innerText = match.p1.champion;
+                } else if (match.p1.name === "BYE") p1ChampSpan.innerText = "";
+                else p1ChampSpan.innerText = "⚔️";
+                p1Div.appendChild(p1NameSpan);
+                p1Div.appendChild(p1ChampSpan);
+                
+                // Joueur 2
+                const p2Div = document.createElement("div");
+                p2Div.className = `player-slot ${match.winnerIdx === 1 ? 'winner' : ''}`;
+                const p2NameSpan = document.createElement("span");
+                p2NameSpan.className = "player-name";
+                let p2DisplayName = match.p2.name;
+                if (match.p2.name === "BYE") p2DisplayName = "🆓 BYE";
+                else if (match.p2.pending || match.p2.name === "À déterminer") p2DisplayName = "❓ En attente";
+                p2NameSpan.innerText = p2DisplayName;
+                const p2ChampSpan = document.createElement("span");
+                p2ChampSpan.className = "player-champ";
+                if (!match.p2.pending && match.p2.name !== "BYE" && match.p2.name !== "À déterminer" && match.p2.champion && match.p2.champion !== "—") {
+                    p2ChampSpan.innerText = match.p2.champion;
+                } else if (match.p2.name === "BYE") p2ChampSpan.innerText = "";
+                else p2ChampSpan.innerText = "⚔️";
+                p2Div.appendChild(p2NameSpan);
+                p2Div.appendChild(p2ChampSpan);
+                
+                playersDiv.appendChild(p1Div);
+                const vs = document.createElement("div");
+                vs.className = "vs-badge";
+                vs.innerText = "VS";
+                playersDiv.appendChild(vs);
+                playersDiv.appendChild(p2Div);
+                
+                // Si c'est un match réel (pas pending)
+                const isRealMatch = (!match.p1.pending && !match.p2.pending && match.p1.name !== "À déterminer" && match.p2.name !== "À déterminer");
+                if (isRealMatch && match.p1.name !== "BYE" && match.p2.name !== "BYE") {
+                    // Contrôle vainqueur via click sur les slots
+                    p1Div.style.cursor = "pointer";
+                    p2Div.style.cursor = "pointer";
+                    p1Div.title = "Cliquez pour déclarer vainqueur (côté gauche)";
+                    p2Div.title = "Cliquez pour déclarer vainqueur (côté droit)";
+                    p1Div.onclick = (e) => {
+                        e.stopPropagation();
+                        setMatchWinner(match, 0, currentBracket);
+                    };
+                    p2Div.onclick = (e) => {
+                        e.stopPropagation();
+                        setMatchWinner(match, 1, currentBracket);
+                    };
+                } else if (match.p1.name === "BYE" && match.p2.name !== "BYE" && !match.p2.pending) {
+                    // Bye auto winner = p2
+                    if (match.winnerIdx === null) {
+                        match.winnerIdx = 1;
+                        propagateWinners(currentBracket);
+                        renderBracket(currentBracket, useRandomChamps);
+                    }
+                } else if (match.p2.name === "BYE" && match.p1.name !== "BYE" && !match.p1.pending) {
+                    if (match.winnerIdx === null) {
+                        match.winnerIdx = 0;
+                        propagateWinners(currentBracket);
+                        renderBracket(currentBracket, useRandomChamps);
+                    }
+                }
+                
+                // Double click pour éditer nom (sauf BYE & pending)
+                if (match.p1.name !== "BYE" && !match.p1.pending && match.p1.name !== "À déterminer") {
+                    p1Div.ondblclick = (e) => {
+                        e.stopPropagation();
+                        let newName = prompt("Nouveau nom du joueur (gauche):", match.p1.name);
+                        if (newName !== null) editPlayerName(match, 0, newName, useRandomChamps, currentBracket);
+                    };
+                }
+                if (match.p2.name !== "BYE" && !match.p2.pending && match.p2.name !== "À déterminer") {
+                    p2Div.ondblclick = (e) => {
+                        e.stopPropagation();
+                        let newName = prompt("Nouveau nom du joueur (droite):", match.p2.name);
+                        if (newName !== null) editPlayerName(match, 1, newName, useRandomChamps, currentBracket);
+                    };
+                }
+                
+                card.appendChild(playersDiv);
+                roundDiv.appendChild(card);
+            }
+            bracketDiv.appendChild(roundDiv);
+        }
+        container.innerHTML = "";
+        container.appendChild(bracketDiv);
+    }
+    
+    // Fonction principale: lire input, parser noms, générer bracket
+    function buildAndRender() {
+        let countInput = document.getElementById("playerCount").value;
+        let desiredCount = parseInt(countInput, 10);
+        let rawNames = document.getElementById("playerNamesInput").value;
+        let useRandom = document.getElementById("randomChampCheckbox").checked;
+        
+        let namesList = [];
+        if (rawNames.trim() !== "") {
+            // split par virgule ou retour ligne
+            let splitByComma = rawNames.split(",").map(s => s.trim()).filter(s => s);
+            if (splitByComma.length > 1) namesList = splitByComma;
+            else {
+                let splitByLine = rawNames.split(/\r?\n/).map(s => s.trim()).filter(s => s);
+                namesList = splitByLine;
+            }
+        }
+        // Si on a un nombre défini mais pas assez de noms, on génère des noms par défaut
+        if (namesList.length === 0) {
+            for (let i = 1; i <= desiredCount; i++) namesList.push(`Guerrier ${i}`);
+        } else if (namesList.length !== desiredCount) {
+            // Ajuster pour correspondre au count (troncature ou ajout)
+            if (namesList.length > desiredCount) namesList = namesList.slice(0, desiredCount);
+            else {
+                for (let i = namesList.length + 1; i <= desiredCount; i++) namesList.push(`Challenger ${i}`);
+            }
+        }
+        // Mettre à jour le textarea pour refléter les noms propres
+        document.getElementById("playerNamesInput").value = namesList.join(", ");
+        // Générer bracket
+        let rounds = generateBracketFromPlayers(namesList, useRandom);
+        currentBracket = rounds;
+        renderBracket(currentBracket, useRandom);
+    }
+    
+    // event listeners
+    document.getElementById("generateBtn").addEventListener("click", () => {
+        buildAndRender();
+    });
+    document.getElementById("randomChampCheckbox").addEventListener("change", () => {
+        if (currentBracket.length) {
+            // Re-générer avec les mêmes noms mais champions aléatoires ou non
+            let names = extractCurrentPlayerNames(currentBracket);
+            let useRandom = document.getElementById("randomChampCheckbox").checked;
+            let newRounds = generateBracketFromPlayers(names, useRandom);
+            currentBracket = newRounds;
+            renderBracket(currentBracket, useRandom);
+        }
+    });
+    
+    function extractCurrentPlayerNames(rounds) {
+        if (!rounds.length) return [];
+        let namesSet = [];
+        let firstRound = rounds[0];
+        for (let match of firstRound) {
+            if (match.p1 && match.p1.name !== "BYE" && !match.p1.pending && match.p1.name !== "À déterminer") namesSet.push(match.p1.name);
+            if (match.p2 && match.p2.name !== "BYE" && !match.p2.pending && match.p2.name !== "À déterminer") namesSet.push(match.p2.name);
+        }
+        return namesSet;
+    }
+    
+    // initialisation demo
+    (function initDemo() {
+        document.getElementById("playerNamesInput").value = "Faker, Caps, Chovy, Zeus, Gumayusi, BeryL, Oner, Keria";
+        document.getElementById("playerCount").value = "8";
+        buildAndRender();
+    })();
+</script>
+</body>
+</html>
