@@ -103,7 +103,7 @@
             flex-direction: column;
             gap: 0.5rem;
             flex: 1;
-            min-width: 150px;
+            min-width: 160px;
         }
         .input-group label {
             font-size: 0.7rem;
@@ -121,10 +121,14 @@
             font-size: 0.9rem;
             transition: all 0.2s;
         }
-        input:focus, select:focus {
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #D4AF37;
             box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
+        }
+        textarea {
+            resize: vertical;
+            font-family: monospace;
         }
         button {
             background: #1e293b;
@@ -150,6 +154,38 @@
         }
         button:hover {
             background: #2d3a5e;
+        }
+
+        /* Ligne spécifique pour le bracket config */
+        .bracket-config {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            align-items: flex-end;
+        }
+        .bracket-config .input-group {
+            flex: 2;
+        }
+        .bracket-config .input-group:first-child {
+            flex: 1;
+        }
+        .bracket-config .btn-group {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        .random-toggle-bracket {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: #0f121b;
+            padding: 0.5rem 1.2rem;
+            border-radius: 40px;
+            border: 1px solid #2d354a;
+        }
+        .random-toggle-bracket span {
+            font-size: 0.85rem;
+            font-weight: 500;
         }
 
         /* Bracket */
@@ -318,13 +354,6 @@
             background: #D4AF37;
             color: #0a0c12;
         }
-        .warning-badge {
-            background: #e67e22;
-            color: #0a0c12;
-            font-size: 0.7rem;
-            padding: 0.2rem 0.6rem;
-            border-radius: 30px;
-        }
 
         .history-list {
             display: flex;
@@ -349,6 +378,8 @@
             body { padding: 1rem; }
             .team-container { flex-direction: column; }
             .player-card { flex-direction: column; align-items: stretch; border-radius: 20px; }
+            .bracket-config { flex-direction: column; }
+            .random-toggle-bracket { justify-content: center; }
         }
     </style>
 </head>
@@ -367,24 +398,26 @@
     <!-- ==================== TAB BRACKET 1v1 ==================== -->
     <div id="bracketTab" class="tab-content active">
         <div class="config-panel">
-            <div class="input-group">
-                <label>🏆 NOMBRE DE JOUEURS</label>
-                <input type="number" id="playerCount" min="2" max="64" value="8" step="1">
-            </div>
-            <div class="input-group">
-                <label>📝 NOMS (séparés par virgule)</label>
-                <textarea id="playerNamesInput" rows="2" placeholder="Ex: Faker, Caps, Chovy, Zeus"></textarea>
-            </div>
-            <div class="btn-group">
-                <button id="generateBtn" class="primary">✨ Générer le bracket</button>
-            </div>
-            <div class="random-toggle" style="display: flex; align-items: center; gap: 12px;">
-                <span>🎲 Champions aléatoires</span>
-                <label style="display: flex; align-items: center; gap: 8px;">
-                    <span>OFF</span>
-                    <input type="checkbox" id="randomChampCheckbox" style="width: 18px; height: 18px;">
-                    <span>ON</span>
-                </label>
+            <div class="bracket-config">
+                <div class="input-group">
+                    <label>🏆 NOMBRE DE JOUEURS</label>
+                    <input type="number" id="playerCount" min="2" max="64" value="8" step="1">
+                </div>
+                <div class="input-group">
+                    <label>📝 NOMS (séparés par virgule)</label>
+                    <textarea id="playerNamesInput" rows="2" placeholder="Ex: Faker, Caps, Chovy, Zeus, Gumayusi, BeryL, Oner, Keria"></textarea>
+                </div>
+                <div class="btn-group">
+                    <button id="generateBtn" class="primary">✨ Générer le bracket</button>
+                </div>
+                <div class="random-toggle-bracket">
+                    <span>🎲 Champions aléatoires</span>
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <span style="font-size:0.8rem;">OFF</span>
+                        <input type="checkbox" id="randomChampCheckbox" style="width: 18px; height: 18px; cursor: pointer;">
+                        <span style="font-size:0.8rem;">ON</span>
+                    </label>
+                </div>
             </div>
         </div>
 
@@ -437,7 +470,7 @@
     <div class="footer-info">
         🔹 Bracket : cliquez sur un joueur pour vainqueur (sauvegarde auto) | Double-clic pour modifier le nom<br>
         🔹 Équipes : maximum 10 joueurs (5v5). Cochez "Équilibrer par rang" et/ou "Répartir par rôle" pour un équilibrage intelligent.<br>
-        🔹<strong>V0.5</strong>
+        🔹 <strong>V0.5</strong>
     </div>
 </div>
 
@@ -480,7 +513,7 @@
     function setWinner(match, side) { if(!match) return; if((side==='p1' && (match.p1?.pending || match.p1?.name==="BYE")) || (side==='p2' && (match.p2?.pending || match.p2?.name==="BYE"))) return; match.winner = side; updateAllRounds(currentRounds); renderBracket(); const finalRound = currentRounds[currentRounds.length-1]; if(finalRound && finalRound.length===1 && finalRound[0].winner) { const w = finalRound[0].winner==='p1' ? finalRound[0].p1 : finalRound[0].p2; if(w && w.name && w.name!=="???" && w.name!=="BYE") addBracketWinner(w.name, w.champion!=="—"?w.champion:null); } }
     function createBracket(playerNames, useRandom) { const n=playerNames.length, size = Math.pow(2, Math.ceil(Math.log2(n))); let idx=0, first=[]; for(let i=0; i<size/2; i++) { let p1 = idx<n ? {name:playerNames[idx++], champion:useRandom?getRandomChampion():"—", pending:false} : {name:"BYE", champion:"", pending:true}; let p2 = idx<n ? {name:playerNames[idx++], champion:useRandom?getRandomChampion():"—", pending:false} : {name:"BYE", champion:"", pending:true}; first.push({id:Math.random(), p1, p2, winner:null}); } for(let m of first) { if(m.p1.name==="BYE" && m.p2.name!=="BYE") m.winner='p2'; else if(m.p2.name==="BYE" && m.p1.name!=="BYE") m.winner='p1'; } let rounds=[first], cur=first; while(cur.length>1) { let next=[]; for(let i=0; i<cur.length; i+=2) next.push({id:Math.random(), p1:{name:"???", champion:"—", pending:true}, p2:{name:"???", champion:"—", pending:true}, winner:null, sourceLeft:cur[i], sourceRight:cur[i+1]}); rounds.push(next); cur=next; } updateAllRounds(rounds); return rounds; }
     function renderBracket() { const container = document.getElementById("bracketTree"); if(!currentRounds.length) { container.innerHTML='<div style="padding:2rem;">Générez un bracket</div>'; return; } const bracketDiv = document.createElement("div"); bracketDiv.className="bracket"; for(let r=0; r<currentRounds.length; r++) { const roundDiv=document.createElement("div"); roundDiv.className="round"; let title=r===0?"🎯 Premier tour":(r===currentRounds.length-1?"🏆 FINALE":`Tour ${r}`); const titleEl=document.createElement("div"); titleEl.className="round-title"; titleEl.innerText=title; roundDiv.appendChild(titleEl); for(let match of currentRounds[r]) { const card=document.createElement("div"); card.className="match-card"; const playersDiv=document.createElement("div"); playersDiv.className="match-players"; const makeSlot = (player, isWin) => { const div=document.createElement("div"); div.className=`player-slot ${isWin?'winner':''}`; const nameSpan=document.createElement("span"); nameSpan.innerText=player.name==="BYE"?"🆓 BYE":(player.pending?"❓ ?":player.name); const champSpan=document.createElement("span"); champSpan.className="player-champ"; if(!player.pending && player.name!=="BYE" && player.champion && player.champion!=="—") { const img=document.createElement("img"); img.src=getChampionIconUrl(player.champion); img.className="champ-icon"; img.style.width="18px"; img.onerror=()=>img.style.display='none'; champSpan.appendChild(img); champSpan.appendChild(document.createTextNode(player.champion)); } else if(player.name!=="BYE") champSpan.innerText="⚔️"; div.appendChild(nameSpan); div.appendChild(champSpan); return div; }; const p1Div=makeSlot(match.p1, match.winner==='p1'); const p2Div=makeSlot(match.p2, match.winner==='p2'); playersDiv.appendChild(p1Div); const vs=document.createElement("div"); vs.className="vs-badge"; vs.innerText="VS"; playersDiv.appendChild(vs); playersDiv.appendChild(p2Div); if(!match.p1.pending && match.p1.name!=="BYE" && match.p1.name!=="???") { p1Div.classList.add("clickable"); p1Div.onclick=e=>setWinner(match,'p1'); p1Div.ondblclick=e=>{ let n=prompt("Nouveau nom:", match.p1.name); if(n&&n.trim()) { match.p1.name=n.trim(); if(currentUseRandom) match.p1.champion=getRandomChampion(); match.winner=null; updateAllRounds(currentRounds); renderBracket(); } }; } if(!match.p2.pending && match.p2.name!=="BYE" && match.p2.name!=="???") { p2Div.classList.add("clickable"); p2Div.onclick=e=>setWinner(match,'p2'); p2Div.ondblclick=e=>{ let n=prompt("Nouveau nom:", match.p2.name); if(n&&n.trim()) { match.p2.name=n.trim(); if(currentUseRandom) match.p2.champion=getRandomChampion(); match.winner=null; updateAllRounds(currentRounds); renderBracket(); } }; } card.appendChild(playersDiv); roundDiv.appendChild(card); } bracketDiv.appendChild(roundDiv); } container.innerHTML=""; container.appendChild(bracketDiv); }
-    function generateBracketFromUI() { let raw=document.getElementById("playerNamesInput").value; currentUseRandom=document.getElementById("randomChampCheckbox").checked; let names=raw.split(",").map(s=>s.trim()).filter(s=>s); if(names.length===0) names=["Faker","Caps","Chovy","Zeus"]; currentRounds=createBracket(names, currentUseRandom); renderBracket(); }
+    function generateBracketFromUI() { let raw=document.getElementById("playerNamesInput").value; currentUseRandom=document.getElementById("randomChampCheckbox").checked; let names=raw.split(",").map(s=>s.trim()).filter(s=>s); if(names.length===0) names=["Faker","Caps","Chovy","Zeus","Gumayusi","BeryL","Oner","Keria"]; currentRounds=createBracket(names, currentUseRandom); renderBracket(); }
 
     // ==================== PARTIE 2 : CREATEUR EQUIPES 5v5 ====================
     const RANKS = ["Fer IV","Fer III","Fer II","Fer I","Bronze IV","Bronze III","Bronze II","Bronze I","Argent IV","Argent III","Argent II","Argent I","Or IV","Or III","Or II","Or I","Platine IV","Platine III","Platine II","Platine I","Émeraude IV","Émeraude III","Émeraude II","Émeraude I","Diamant IV","Diamant III","Diamant II","Diamant I","Master","Grandmaster","Challenger"];
@@ -523,7 +556,6 @@
     
     function balanceTeamsByRankAndRole(players, useRank, useRole) {
         if (!players.length) return { blue: [], red: [] };
-        // Limiter à 10 joueurs max pour 5v5
         let limitedPlayers = players.slice(0, 10);
         let playerCopy = limitedPlayers.map(p => ({ ...p, elo: useRank ? getRankValue(p.rank) : 0 }));
         
@@ -588,23 +620,6 @@
         if(!blue.length && !red.length) { blueUl.innerHTML='<li>Aucun joueur</li>'; redUl.innerHTML='<li>Aucun joueur</li>'; return; }
         blueUl.innerHTML = blue.map(p => `<li><span>${escapeHtml(p.name)}</span><span class="rank-color ${getRankClass(p.rank)}">${p.rank || '?'}</span>${p.role ? `<span class="role-badge" style="margin-left:6px;">${p.role}</span>` : ''}</li>`).join('');
         redUl.innerHTML = red.map(p => `<li><span>${escapeHtml(p.name)}</span><span class="rank-color ${getRankClass(p.rank)}">${p.rank || '?'}</span>${p.role ? `<span class="role-badge" style="margin-left:6px;">${p.role}</span>` : ''}</li>`).join('');
-        if(blue.length !== red.length) {
-            const diff = Math.abs(blue.length - red.length);
-            const msg = document.getElementById("teamsContainer");
-            const existingMsg = document.getElementById("teamSizeWarning");
-            if(existingMsg) existingMsg.remove();
-            const warning = document.createElement("div");
-            warning.id = "teamSizeWarning";
-            warning.style.textAlign = "center";
-            warning.style.marginTop = "1rem";
-            warning.style.padding = "0.5rem";
-            warning.style.background = "#2d1f2a";
-            warning.style.borderRadius = "30px";
-            warning.style.color = "#FFD966";
-            warning.innerHTML = `⚠️ Nombre de joueurs déséquilibré : ${blue.length} vs ${red.length} (${diff} joueur(s) de différence)`;
-            msg.parentNode.insertBefore(warning, msg.nextSibling);
-            setTimeout(() => { if(warning) warning.remove(); }, 4000);
-        }
     }
     
     function generateBalancedTeams() {
